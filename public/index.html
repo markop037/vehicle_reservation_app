@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vehicle Reservation App</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        h1 {
+            color: #333;
+        }
+        .section {
+            margin-bottom: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        table, th, td {
+            border: 1px solid #ddd;
+        }
+        th, td {
+            padding: 8px;
+            text-align: left;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.4);
+        }
+        .modal-content {
+            background-color: #fefefe;
+            margin: 15% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+        }
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        /* Modal styling for return vehicle */
+        #returnModal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+        }
+        #modalContent {
+            background-color: white;
+            margin: 15% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 300px;
+        }
+        .closeBtn {
+            color: red;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+        .closeBtn:hover,
+        .closeBtn:focus {
+            color: black;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <h1>Vehicle Reservation System</h1>
+
+    <!-- Section for displaying list of vehicles -->
+    <div class="section">
+        <h2>List of Vehicles</h2>
+        <table id="vehicle-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Model</th>
+                    <th>Year</th>
+                    <th>Reserved</th>
+                    <th>Reserve</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+
+    <!-- Modal for reservation -->
+    <div id="reservation-modal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Reserve Vehicle</h2>
+            <form id="reservation-form">
+                <label for="renter-name">Renter Name:</label>
+                <input type="text" id="renter-name" name="renter-name" required><br><br>
+                <label for="return-date">Planned Return Date:</label>
+                <input type="date" id="return-date" name="return-date" required><br><br>
+                <input type="hidden" id="vehicle-id" name="vehicle-id">
+                <button type="submit">Submit Reservation</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Section for displaying top-rated vehicles -->
+    <div class="section">
+        <h2>Top 3 Rated Vehicles</h2>
+        <table id="top-rated-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Model</th>
+                    <th>Rating</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+
+    <!-- Section for displaying available vehicles -->
+    <div class="section">
+        <h2>Available Vehicles</h2>
+        <table id="available-vehicles-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Model</th>
+                    <th>Year</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+
+    <!-- Section for displaying reserved vehicles -->
+    <div class="section">
+        <h2>Reserved Vehicles</h2>
+        <table id="reserved-vehicles-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Model</th>
+                    <th>Planned Return Date</th>
+                    <th>Renter Info</th>
+                    <th>Action</th> <!-- New column for return action -->
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+
+    <!-- Modal for vehicle return -->
+    <div id="returnModal">
+        <div id="modalContent">
+            <span class="closeBtn" id="closeModal">&times;</span>
+            <h2>Return Vehicle Early</h2>
+            <form id="returnForm">
+                <label for="rating">Rating (1-5):</label><br>
+                <input type="number" id="rating" name="rating" min="1" max="5" required><br><br>
+                <input type="hidden" id="vehicleId" name="vehicleId">
+                <button type="submit">Return Vehicle</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Function to show reservation modal
+        const openModal = (vehicleId) => {
+            document.getElementById('vehicle-id').value = vehicleId;
+            document.getElementById('reservation-modal').style.display = 'block';
+        };
+
+        // Close reservation modal
+        document.querySelector('.close').onclick = () => {
+            document.getElementById('reservation-modal').style.display = 'none';
+        };
+
+        // Submit reservation form
+        document.getElementById('reservation-form').onsubmit = async (e) => {
+            e.preventDefault();
+            const vehicleId = document.getElementById('vehicle-id').value;
+            const renterName = document.getElementById('renter-name').value;
+            const returnDate = document.getElementById('return-date').value;
+
+            const response = await fetch('/reserve-vehicle', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    vehicleId,
+                    renterName,
+                    returnDate
+                }),
+            });
+
+            if (response.ok) {
+                alert('Vehicle reserved successfully!');
+                document.getElementById('reservation-modal').style.display = 'none';
+                fetchVehicles();
+            }
+        };
+
+        // Fetch and display vehicles
+        const fetchVehicles = async () => {
+            const response = await fetch('/vehicles');
+            const vehicles = await response.json();
+            const vehicleTableBody = document.querySelector('#vehicle-table tbody');
+            vehicleTableBody.innerHTML = '';
+            vehicles.forEach(vehicle => {
+                const reserveButton = vehicle.reserved ? 'Reserved' : `<button onclick="openModal(${vehicle.id})">Reserve</button>`;
+                const row = `
+                    <tr>
+                        <td>${vehicle.id}</td>
+                        <td>${vehicle.model}</td>
+                        <td>${vehicle.year}</td>
+                        <td>${vehicle.reserved ? 'Yes' : 'No'}</td>
+                        <td>${reserveButton}</td>
+                    </tr>
+                `;
+                vehicleTableBody.innerHTML += row;
+            });
+        };
+
+        // Fetch and display top-rated vehicles
+        const fetchTopRatedVehicles = async () => {
+            const response = await fetch('/top-rated-vehicles');
+            const topVehicles = await response.json();
+            const topRatedTableBody = document.querySelector('#top-rated-table tbody');
+            topRatedTableBody.innerHTML = '';
+            topVehicles.forEach(vehicle => {
+                const row = `
+                    <tr>
+                        <td>${vehicle.id}</td>
+                        <td>${vehicle.model}</td>
+                        <td>${vehicle.rating}</td>
+                    </tr>
+                `;
+                topRatedTableBody.innerHTML += row;
+            });
+        };
+
+        // Fetch and display available vehicles
+        const fetchAvailableVehicles = async () => {
+            const response = await fetch('/vehicles');
+            const vehicles = await response.json();
+            const availableTableBody = document.querySelector('#available-vehicles-table tbody');
+            availableTableBody.innerHTML = '';
+            vehicles.filter(vehicle => !vehicle.reserved).forEach(vehicle => {
+                const row = `
+                    <tr>
+                        <td>${vehicle.id}</td>
+                        <td>${vehicle.model}</td>
+                        <td>${vehicle.year}</td>
+                    </tr>
+                `;
+                availableTableBody.innerHTML += row;
+            });
+        };
+
+        // Funkcija za preuzimanje i prikaz rezervisanih vozila
+        const fetchReservedVehicles = async () => {
+        const response = await fetch('/reserved-vehicles');
+        const reservedVehicles = await response.json();
+        const reservedTableBody = document.querySelector('#reserved-vehicles-table tbody');
+        reservedTableBody.innerHTML = '';
+        reservedVehicles.forEach(vehicle => {
+            const row = `
+            <tr>
+                <td>${vehicle.id}</td>
+                <td>${vehicle.model}</td>
+                <td>${vehicle.plannedReturnDate}</td> <!-- Prilagodite ovde -->
+                <td>${vehicle.renterName}</td> <!-- Prilagodite ovde -->
+                <td><button onclick="showReturnModal(${vehicle.id})">Return Early</button></td>
+            </tr>
+            `;
+            reservedTableBody.innerHTML += row;
+        });
+        };
+
+
+        // Show return vehicle modal
+        const showReturnModal = (vehicleId) => {
+            document.getElementById('vehicleId').value = vehicleId;
+            document.getElementById('returnModal').style.display = 'block';
+        };
+
+        // Close return vehicle modal
+        document.getElementById('closeModal').onclick = () => {
+            document.getElementById('returnModal').style.display = 'none';
+        };
+
+        // Handle return vehicle form submission
+        document.getElementById('returnForm').onsubmit = async (e) => {
+            e.preventDefault();
+            const vehicleId = document.getElementById('vehicleId').value;
+            const rating = document.getElementById('rating').value;
+
+            const response = await fetch('/return-vehicle', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    vehicleId,
+                    rating
+                }),
+            });
+
+            if (response.ok) {
+                alert('Vehicle returned successfully!');
+                document.getElementById('returnModal').style.display = 'none';
+                fetchVehicles();
+                fetchReservedVehicles();
+            }
+        };
+
+        // Fetch initial data
+        fetchVehicles();
+        fetchTopRatedVehicles();
+        fetchAvailableVehicles();
+        fetchReservedVehicles();
+    </script>
+</body>
+</html>
+
+
