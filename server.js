@@ -46,7 +46,7 @@ app.get('/top-rated-vehicles', (req, res) => {
   res.json(topRated);
 });
 
-// Nova ruta za dobijanje rezervisanih vozila sa informacijama o rentijeru
+// Route to get reserved vehicles with renter information
 app.get('/reserved-vehicles', (req, res) => {
   const data = readData();
   const reservedVehicles = data.reservations.map(reservation => {
@@ -55,15 +55,14 @@ app.get('/reserved-vehicles', (req, res) => {
     return {
       id: vehicle.id,
       model: vehicle.model,
-      plannedReturnDate: reservation.returnDate, // Prilagodite ovde
-      renterName: renter.name // Prilagodite ovde
+      plannedReturnDate: reservation.returnDate,
+      renterName: renter.name
     };
   });
   res.json(reservedVehicles);
 });
 
-
-// New route for getting renters
+// Route for getting renters
 app.get('/renters', (req, res) => {
   const data = readData();
   res.json(data.renters);
@@ -109,7 +108,7 @@ app.post('/return-vehicle', (req, res) => {
   if (vehicle && vehicle.reserved) {
     // Update vehicle to available
     vehicle.reserved = false;
-    vehicle.rating = rating;
+    vehicle.rating = parseFloat(rating); // Ensure rating is a number
 
     // Remove reservation
     const reservationIndex = data.reservations.findIndex(r => r.vehicleId === vehicle.id);
@@ -129,11 +128,39 @@ app.post('/return-vehicle', (req, res) => {
   }
 });
 
+// Route for adding a new vehicle
+app.post('/add-vehicle', (req, res) => {
+  const data = readData();
+  const { model, year, rating } = req.body;
+
+  // Generate new vehicle ID
+  const newId = data.vehicles.length > 0 ? Math.max(...data.vehicles.map(v => v.id)) + 1 : 1;
+
+  // Create new vehicle object
+  const newVehicle = {
+    id: newId,
+    model: model,
+    year: parseInt(year),
+    reserved: false,
+    rating: parseFloat(rating)
+  };
+
+  // Add new vehicle to the list
+  data.vehicles.push(newVehicle);
+
+  // Save updated data
+  writeData(data);
+
+  res.status(200).send('Vehicle added successfully');
+});
+
 // Start the server
 const PORT = 3000;
 server.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
 });
+
+
 
 
 

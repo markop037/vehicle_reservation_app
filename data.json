@@ -4,93 +4,79 @@
       "id": 1,
       "model": "Toyota Corolla",
       "year": 2018,
-      "reserved": true,
-      "rating": 4.5
+      "reserved": false,
+      "rating": "4.5"
     },
     {
       "id": 2,
       "model": "Honda Civic",
       "year": 2019,
-      "reserved": false,
-      "rating": "5"
+      "reserved": true,
+      "rating": "4.7"
     },
     {
       "id": 3,
       "model": "Ford Mustang",
       "year": 2021,
       "reserved": false,
-      "rating": 4.9
+      "rating": "4.9"
     },
     {
       "id": 4,
       "model": "Tesla Model 3",
       "year": 2020,
       "reserved": true,
-      "rating": 5
+      "rating": "5.0"
     },
     {
       "id": 5,
       "model": "BMW X5",
       "year": 2017,
       "reserved": false,
-      "rating": 4.6
+      "rating": "4.6"
     },
     {
       "id": 6,
       "model": "Audi A6",
       "year": 2016,
-      "reserved": false,
-      "rating": "2"
+      "reserved": true,
+      "rating": "4.4"
     },
     {
       "id": 7,
       "model": "Mercedes-Benz C-Class",
       "year": 2019,
-      "reserved": true,
-      "rating": 4.8
+      "reserved": false,
+      "rating": "4.8"
+    },
+    {
+      "id": 8,
+      "model": "Golf 7",
+      "year": 2020,
+      "reserved": false,
+      "rating": 3
     }
   ],
   "reservations": [
     {
+      "vehicleId": 2,
+      "renterId": 1,
+      "returnDate": "2024-09-15"
+    },
+    {
       "vehicleId": 4,
       "renterId": 2,
       "returnDate": "2024-09-20"
-    },
-    {
-      "vehicleId": 1,
-      "renterId": 4,
-      "returnDate": "2024-09-12"
-    },
-    {
-      "vehicleId": 7,
-      "renterId": 5,
-      "returnDate": "2024-09-09"
     }
   ],
   "renters": [
     {
       "id": 1,
-      "name": "John Doe"
+      "name": "Marko Markovic"
     },
     {
       "id": 2,
-      "name": "Jane Smith"
-    },
-    {
-      "id": 3,
-      "name": "Michael Johnson"
-    },
-    {
-      "id": 4,
-      "name": "Marko Peric"
-    },
-    {
-      "id": 5,
       "name": "Nikola Nikolic"
-    },
-    {
-      "id": 6,
-      "name": "Lazar Antic"
     }
   ]
 }
